@@ -1,5 +1,7 @@
 import re
 import pandas as pd
+import locale
+
 
 def prepro():
     def date_time(s):
@@ -29,11 +31,15 @@ def prepro():
             message = splitmessage[0]
         return date, time, author, message
 
+    # Set the desired locale for day names (e.g., 'en_US' for English)
+    locale.setlocale(locale.LC_TIME, 'en_US')
+
     data = []
-    fp = open('sample.txt', 'r', encoding='utf-8');
+    fp = open('sample.txt', 'r', encoding='utf-8')
     fp.readline()
     messageBuffer = []
     date, time, user = None, None, None
+
     while True:
         line = fp.readline()
         if not line:
@@ -47,29 +53,25 @@ def prepro():
             messageBuffer.append(message)
         else:
             messageBuffer.append(line)
-    df = pd.DataFrame(data, columns=["date", 'time', 'user', 'message'])
-    df['date'] = pd.to_datetime(df['date'])
+
+    df = pd.DataFrame(data, columns=["date", "time", "user", "message"])
+    
+    # Specify the date format explicitly
+    df['date'] = pd.to_datetime(df['date'], format="%d/%m/%Y")
     df['time'] = pd.to_datetime(df['time'])
-    df.head()
-    # adding year
+
     df['only_date'] = df['date'].dt.date
     df['year'] = df['date'].dt.year
     df['month_num'] = df['date'].dt.month
-    df['month'] = df['date'].dt.month_name()
+    df['month'] = df['date'].dt.strftime("%B")  # Get the correct month name
     df['day'] = df['date'].dt.day
-    df['day_name'] = df['date'].dt.day_name()
+    df['day_name'] = df['date'].dt.strftime("%A")  # Get the correct day name
     df['hour'] = df['time'].dt.hour
     df['minute'] = df['time'].dt.minute
 
-    period = []
-    # for hour in df[['day_name', 'hour']]['hour']:
-    #     if hour == 23:
-    #         period.append(str(hour) + "-" + str('00'))
-    #     elif hour == 0:
-    #         period.append(str('00') + "-" + str(hour + 1))
-    #     else:
-    #         period.append(str(hour) + "-" + str(hour + 1))
+    # print(df['month'])
 
+    period = []
     for hour in df[['day_name', 'hour']]['hour']:
         if hour >= 5 and hour <= 12:
             period.append("Morning")

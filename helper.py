@@ -15,6 +15,17 @@ from lib2to3.pgen2.pgen import DFAState
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 
+new_words= {
+    'bekar' : -2.5,
+    'badhiya' : 2.0,
+    'shukriya' : 1.5,
+    'बेकार' : -3.0,
+    'achaa' : 2.0,
+    'acha' : 2.0,
+    'Faaltu' : -2.0,
+    'badiya' : 2.0
+}
+
 
 def fetch_stats(selected_user, df):
     if selected_user != 'Overall':
@@ -54,6 +65,7 @@ def create_wordcloud(selected_user,df):
 
     temp = df[df['user'] != 'group_notification']
     temp = temp[temp['message'] != '<Media omitted>\n']
+
 
     def remove_stop_words(message):
         y = []
@@ -146,7 +158,8 @@ def activity_heatmap(selected_user,df):
     if selected_user != 'Overall':
         df = df[df['user'] == selected_user]
 
-    activity_heatmap = df.pivot_table(index='day_name', columns='period', values='message', aggfunc='count').fillna(0)
+    activity_heatmap = df.pivot_table(index='day_name', columns='period', 
+                                    values='message', aggfunc='count').fillna(0)
 
     return activity_heatmap
 
@@ -157,7 +170,8 @@ def sentiment(selected_user, df):
         df = df[df['user'] == selected_user]
 
     temp = df[df['user'] != 'group_notification']
-    temp = temp[temp['message'] != '<Media omitted>\n']
+    temp = temp[~temp['message'].str.contains('<Media omitted>|<media omitted>|<omitted>')]
+    # temp['message'] = temp['message'].apply(lambda x: re.sub(r'http\S+|www.\S+', '', x))
 
 
     posarr = []
@@ -168,6 +182,7 @@ def sentiment(selected_user, df):
 
     for message in temp['message']:
         sid_obj = SentimentIntensityAnalyzer()
+        sid_obj.lexicon.update(new_words)
         sentiment_dict = sid_obj.polarity_scores(message)
 
         negarr.append(sentiment_dict['neg'] * 100)
@@ -181,7 +196,6 @@ def sentiment(selected_user, df):
 
         elif sentiment_dict['compound'] <= - 0.05:
             res.append("Negative")
-
         else:
             res.append("Neutral")
 
@@ -201,7 +215,8 @@ def conclusion(selected_user, df):
         df = df[df['user'] == selected_user]
 
     temp = df[df['user'] != 'group_notification']
-    temp = temp[temp['message'] != '<Media omitted>\n']
+    temp = temp[~temp['message'].str.contains('<Media omitted>|<media omitted>|<omitted>')]
+    # temp['message'] = temp['message'].apply(lambda x: re.sub(r'http\S+|www.\S+', '', x))
 
     tot = 0
     totMessages = 0
@@ -209,6 +224,7 @@ def conclusion(selected_user, df):
 
     for message in temp['message']:
         sid_obj = SentimentIntensityAnalyzer()
+        sid_obj.lexicon.update(new_words)
         sentiment_dict = sid_obj.polarity_scores(message)
         if sentiment_dict['compound'] != 0:
             totMessages = totMessages + 1
@@ -232,6 +248,9 @@ def conclusion(selected_user, df):
     }
     most_common_df = pd.DataFrame(dict)
     return most_common_df
+
+
+
 
 
 

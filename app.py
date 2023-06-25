@@ -1,26 +1,15 @@
-# matplotlib.pyplot is imported for data visualization.
 import matplotlib.pyplot as plt
-
 import pandas as pd
-
-# streamlit is imported as the web framework for building the application
 import streamlit as st
-
-# seaborn is imported for additional data visualization capabilities.
 import seaborn as sns
-
 import mplcursors
-
 import plotly.graph_objects as go
-
-
-# elper and preprocessor are custom modules or scripts that contain helper functions for data preprocessing and analysis.
 import helper
 import preprocessor
 
 # Sidebar and main screen text and title.
 st.title("WhatsApp Data Sentiment Analyzer")
-st.markdown("This app is use to analyze your WhatsApp Chat using the exported text file 📁.")
+st.markdown(" ##### This app is use to analyze your WhatsApp Chat using the exported text file 📁.")
 
 st.sidebar.title("Analyze:")
 st.sidebar.markdown("This app is use to analyze your WhatsApp Chat using the exported text file 📁.")
@@ -44,6 +33,7 @@ if uploaded_file is not None:
         binary_file.write(bytes_data)
     df=preprocessor.prepro()
     # st.dataframe(df)
+
     # fetch unique users
     user_list = df['user'].unique().tolist()
 
@@ -90,10 +80,11 @@ if uploaded_file is not None:
         st.title("Daily Timeline")
         daily_timeline = helper.daily_timeline(selected_user, df)
         fig, ax = plt.subplots()
-        ax.plot(daily_timeline['only_date'], daily_timeline['message'], color='white')
+        ax.plot(daily_timeline['only_date'].astype(str), daily_timeline['message'], color='white')
         ax.set_facecolor("black")
         plt.xticks(rotation='vertical')
         st.pyplot(fig)
+
 
         # activity map
         st.title('Activity Map')
@@ -117,22 +108,21 @@ if uploaded_file is not None:
             plt.xticks(rotation='vertical')
             st.pyplot(fig)
 
+        # st.title("Weekly Activity Map")
+        # # activity_heatmap = helper.activity_heatmap(selected_user, df)
+        # # fig, ax = plt.subplots()
+        # # ax = sns.heatmap(activity_heatmap)
+        # # st.pyplot(fig)
+
+        # weekly activity heatmap
         st.title("Weekly Activity Map")
-        # activity_heatmap = helper.activity_heatmap(selected_user, df)
-        # fig, ax = plt.subplots()
-        # ax = sns.heatmap(activity_heatmap)
-        # st.pyplot(fig)
-
         activity_heatmap = helper.activity_heatmap(selected_user, df)
-
         # Define the desired order for rows and columns
         sorted_rows = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         sorted_columns = ['Morning', 'Afternoon', 'Evening', 'Night']
-
         # Sort the rows and columns based on the desired order
         activity_heatmap = activity_heatmap.reindex(sorted_rows, axis=0)
         activity_heatmap = activity_heatmap.reindex(sorted_columns, axis=1)
-
         fig, ax = plt.subplots()
         ax = sns.heatmap(activity_heatmap)
         st.pyplot(fig)
@@ -148,7 +138,7 @@ if uploaded_file is not None:
             with col1:
                 ax.bar(x.index, x.values, color='white')
                 ax.set_facecolor("black")
-                plt.xticks(rotation='vertical')
+                plt.xticks(rotation='vertical') 
                 st.pyplot(fig)
             with col2:
                 st.dataframe(new_df)
